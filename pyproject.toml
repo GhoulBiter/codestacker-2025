@@ -39,11 +39,17 @@ dependencies = [
     "shapely (>=2.0.7,<3.0.0)",
     "cartopy (>=0.24.1,<0.25.0)",
     "geoplot (>=0.5.1,<0.6.0)",
-    "optuna (>=4.2.1,<5.0.0)"
+    "optuna (>=4.2.1,<5.0.0)",
+    "python-dotenv (>=1.1.0,<2.0.0)",
+    "google-genai (>=1.8.0,<2.0.0)",
+    "pymongo (>=4.11.3,<5.0.0)",
+    "loguru (<=0.7.3); python_version >= '3.11' and python_version < '4.0'",
+    "mlflow (>=2.21.2,<3.0.0)",
+    "branca (>=0.8.1,<0.9.0)"
 ]
 
 [tool.poetry]
-packages = [{include = "codestacker_2025", from = "src"}]
+packages = [{include = "codestacker", from = "src"}]
 
 
 [build-system]

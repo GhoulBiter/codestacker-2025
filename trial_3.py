@@ -62,7 +62,7 @@ def preprocess_text(text):
     return text
 
 
-def extract_nlp_features(df, text_column, max_features=100, n_components=50):
+def extract_nlp_features(df, text_column, max_features=200, n_components=50):
     """Extracts NLP features from a text column"""
     # Ensure text column exists
     if text_column not in df.columns:
@@ -561,7 +561,7 @@ def process_data(df, tfidf=None, svd=None, include_nlp=True):
 print("Starting NLP feature extraction...")
 # Extract NLP features from training data
 train, tfidf_vectorizer, svd_transformer, feature_names = extract_nlp_features(
-    train, "Descript", max_features=100, n_components=30
+    train, "Descript", max_features=200, n_components=50
 )
 
 # Process datasets with NLP features
@@ -870,41 +870,58 @@ def save_model_artifacts(
             f.write(f"\nEnhanced spatial features: {len(spatial_features)}\n")
             f.write("- " + "\n- ".join(spatial_features))
 
+        # Add performance metrics if present
+        if "metrics" in metadata:
+            metrics = metadata["metrics"]
+            f.write(f"\n\nPerformance Metrics:\n")
+            for metric_name, metric_value in metrics.items():
+                f.write(f"- {metric_name}: {metric_value:.4f}\n")
+
     print(f"Model information saved to {readme_path}")
     print(f"Model artifacts successfully saved to {model_dir}")
 
-    # Create a symlink to the latest model
+    # Create a "latest" directory by copying (Windows-friendly approach)
     latest_link = os.path.join(base_dir, "latest")
+
+    # Import shutil for directory operations
+    import shutil
+
+    # If "latest" already exists, try to remove it
     if os.path.exists(latest_link):
-        if os.path.islink(latest_link):
-            os.unlink(latest_link)
-        else:
-            os.rmdir(latest_link)
-    os.symlink(timestamp, latest_link, target_is_directory=True)
-    print(f"Symlink 'latest' created to point to {timestamp}")
+        try:
+            # Remove the directory and all its contents
+            shutil.rmtree(latest_link)
+            print(f"Removed existing 'latest' directory")
+        except Exception as e:
+            print(f"Warning: Could not remove existing 'latest' directory: {e}")
+            # Use an alternative name if we can't remove the existing directory
+            latest_link = os.path.join(base_dir, "latest_model")
+            if os.path.exists(latest_link):
+                try:
+                    shutil.rmtree(latest_link)
+                except:
+                    print(
+                        f"Also could not remove '{latest_link}', using timestamp as name"
+                    )
+                    latest_link = os.path.join(base_dir, f"latest_{timestamp}")
+
+    # Copy the entire model directory to "latest"
+    try:
+        shutil.copytree(model_dir, latest_link)
+        print(
+            f"Created '{os.path.basename(latest_link)}' directory pointing to {timestamp}"
+        )
+    except Exception as e:
+        print(
+            f"Warning: Could not create '{os.path.basename(latest_link)}' directory: {e}"
+        )
+        print("Continuing without creating a 'latest' reference")
 
     return model_dir
 
 
-print("\nSaving model and preprocessing objects...")
-
-# Save the CatBoost model
-model_path = "model_artifacts/catboost_model.cbm"
-model.save_model(model_path)
-print(f"Model saved to {model_path}")
-
-# Save the TF-IDF vectorizer
-tfidf_path = "model_artifacts/tfidf_vectorizer.pkl"
-with open(tfidf_path, "wb") as f:
-    pickle.dump(tfidf_vectorizer, f)
-print(f"TF-IDF vectorizer saved to {tfidf_path}")
-
-# Save the SVD transformer
-svd_path = "model_artifacts/svd_transformer.pkl"
-with open(svd_path, "wb") as f:
-    pickle.dump(svd_transformer, f)
-print(f"SVD transformer saved to {svd_path}")
-
+# Prepare metadata
+# Prepare metadata with properly defined svd_components
 # Convert NumPy arrays to lists for safe serialization
 feature_names_list = None
 if feature_names is not None:
@@ -914,20 +931,29 @@ if feature_names is not None:
         else list(feature_names)
     )
 
+# Define svd_components here in the main code before using it
 svd_components = None
 if svd_transformer is not None and hasattr(svd_transformer, "components_"):
     svd_components = svd_transformer.components_.tolist()
 
-# Save feature names and other metadata
 metadata = {
     "feature_names": X_train.columns.tolist(),
     "categorical_features": categorical_features,
     "svd_components": svd_components,
     "tfidf_feature_names": feature_names_list,
+    "training_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    "metrics": {
+        "accuracy": float(accuracy),
+        "macro_f1": float(macro_f1),
+        "weighted_f1": float(weighted_f1),
+    },
 }
-metadata_path = "model_artifacts/metadata.pkl"
-with open(metadata_path, "wb") as f:
-    pickle.dump(metadata, f)
-print(f"Model metadata saved to {metadata_path}")
+
+# Save model artifacts using the function
+print("\nSaving model artifacts with timestamped directory...")
+model_dir = save_model_artifacts(
+    model, tfidf_vectorizer, svd_transformer, metadata, feature_names
+)
+print(f"Model artifacts saved to {model_dir}")
 
 print("Model saving complete!")

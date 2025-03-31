@@ -1,0 +1,28 @@
+# MLflow configuration file
+
+# Basic server settings
+server:
+  host: 0.0.0.0
+  port: 5000
+  workers: 4
+  enable_cors: true
+
+# Tracking configuration
+tracking:
+  # Local artifact store
+  local_artifact_uri: file:///mlflow/artifacts
+  
+  # Default experiment name
+  default_experiment: crime_classification
+
+# Logging configuration
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: /mlflow/logs/mlflow.log
+  
+# Database configuration
+database:
+  # SQLite (default)
+  backend_store_uri: sqlite:///mlflow/mlflow.db
+  

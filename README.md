@@ -1,132 +1,155 @@
-# CityX Crime Analysis
+# Crime Classification System
 
-osme description
+A comprehensive system for classifying crime reports using NLP and machine learning with MLOps integration.
 
-## Author Details
+## Features
 
-## Table of Contents
+- **Machine Learning Model**: Uses CatBoost classifier with NLP features to predict crime categories
+- **Interactive Dashboard**: Built with Streamlit for data visualization and prediction
+- **MLOps Integration**: MLflow tracking and model registry
+- **Docker Support**: Containerized deployment for both training and serving
+- **CI/CD Pipeline**: GitHub Actions for automated testing and deployment
+- **PDF Processing**: Extract information from PDF police reports
+- **Gemini AI Integration**: Optional Gemini API integration for standardized description formats
 
-## Requirements
+## Project Structure
 
-## Installation
-
-Below is a concise, beginner-friendly README.md to help set up Miniconda, pipx, and Poetry with reproducibility across different OSes:
-
----
-
-```markdown
-# Project Setup: Conda, pipx & Poetry
-
-This guide helps you install Miniconda, pipx, and Poetry for reproducible Python project environments. It covers Linux (Ubuntu), macOS, and Windows (using WSL or CMD/PowerShell).
-
-## 1. Install Miniconda
-
-- **Linux/macOS:**
-  1. Download the installer from [Miniconda](https://docs.conda.io/en/latest/miniconda.html).
-  2. Run the installer:
-     ```bash
-     bash Miniconda3-latest-Linux-x86_64.sh   # or macOS equivalent
-     ```
-  3. Follow the prompts and restart your terminal.
-
-- **Windows:**
-  1. Download the Windows installer from [Miniconda](https://docs.conda.io/en/latest/miniconda.html).
-  2. Run the installer and follow the setup instructions.
-
-## 2. Install pipx via conda
-
-Create a dedicated environment for CLI tools (optional but recommended):
-
-```bash
-conda create -n cli-tools -c conda-forge pipx
-conda activate cli-tools
+```text
+crime-classification-system/
+├── .github/
+│   └── workflows/            # GitHub Actions CI/CD
+├── docker/                   # Docker configuration
+│   ├── Dockerfile.app        # Streamlit app Dockerfile
+│   ├── Dockerfile.train      # Training Dockerfile
+│   ├── Dockerfile.mlflow     # MLflow server Dockerfile
+│   └── docker-compose.yml    # Docker Compose setup
+├── mlflow/                   # MLflow configuration
+├── src/
+│   └── codestacker/
+│       ├── app/              # Streamlit application
+│       ├── training/         # Model training code
+│       └── common/           # Shared utilities
+├── data/                     # Data files
+├── model_artifacts/          # Saved models and artifacts
+├── logs/                     # Application logs
+├── output/                   # Training outputs and visualizations
+├── tests/                    # Test suite
+├── .env                      # Environment variables (not in git)
+├── poetry.toml               # Poetry configuration
+├── pyproject.toml            # Project dependencies
+└── README.md                 # Project documentation
 ```
 
-Ensure pipx's bin directory is in your PATH:
+## Setup and Installation
 
-- **Linux/macOS (bash/zsh):**  
-  Add to `~/.bashrc` or `~/.zshrc`:
+### Prerequisites
 
-  ```sh
-  export PATH="$PATH:$HOME/.local/bin"
-  ```
+- Python 3.10+
+- Poetry for dependency management
+- Docker and Docker Compose for containerized deployment
 
-- **Windows:**  
-  pipx installs to `%USERPROFILE%\.local\bin`. Add this path to your system/user PATH if not automatically done.
+### Local Development Setup
 
-Run:
-
-```bash
-pipx ensurepath
-```
-
-Restart your terminal if needed.
-
-## 3. Install Poetry using pipx
-
-With pipx installed (and optionally, the `cli-tools` environment active), run:
-
-```bash
-pipx install poetry
-```
-
-Verify with:
-
-```bash
-poetry --version
-```
-
-## 4. Start a New Project
-
-There are two options:
-
-### Option A: Let Poetry Manage Its Virtual Environment (Default)
-
-1. Create a new project:
+1. Clone the repository:
 
    ```bash
-   poetry new my-project
-   cd my-project
+   git clone https://github.com/yourusername/crime-classification-system.git
+   cd crime-classification-system
    ```
 
-2. Add dependencies:
+2. Install dependencies with Poetry:
 
    ```bash
-   poetry add streamlit pandas scikit-learn scipy nltk numpy@1.26.4 seaborn statsmodels transformers sentence-transformers fastapi pdfplumber plotly geopandas folium dash keplergl shap lime xgboost lightgbm catboost h3 streamlit-folium streamlit-plotly-events streamlit-lottie dask ray
+   poetry install
    ```
 
-3. Work within the Poetry shell:
+3. Set up environment variables:
 
    ```bash
-   poetry shell
+   cp .env.example .env
+   # Edit .env file with your configuration
    ```
 
-### Option B: Use an Existing Conda Environment
+4. Run the training process:
 
-1. Create and activate your conda environment:
-
-    ```bash
-   conda create -n my-project-env python=3.11
-   conda activate my-project-env
+   ```bash
+   poetry run python -m src.codestacker.training.train --data_path data/Competition_Dataset.csv --visualize
    ```
 
-2. In your project directory, tell Poetry to use the current environment:
+5. Start the Streamlit app:
 
-    ```bash
-   poetry config virtualenvs.create false --local
+   ```bash
+   poetry run streamlit run src/codestacker/app/main.py
    ```
 
-3. Initialize and add dependencies:
+### Docker Setup
 
-    ```bash
-   poetry init
-   poetry add streamlit pandas scikit-learn scipy nltk numpy seaborn statsmodels transformers fastapi
+1. Build and start the services:
+
+   ```bash
+   docker-compose -f docker/docker-compose.yml up -d
    ```
 
-## Summary
+2. Access the services:
+   - Streamlit app: <http://localhost:8501>
+   - MLflow UI: <http://localhost:5000>
 
-- **Miniconda**: Manage your Python installations.
-- **pipx**: Install and manage CLI tools (like Poetry) isolated from your projects.
-- **Poetry**: Create reproducible project environments with dependency management.
+## Model Training
 
-Use the method (Option A or B) that best fits your workflow. Happy coding!
+The training pipeline includes:
+
+1. Text preprocessing and NLP feature extraction
+2. Spatial feature engineering
+3. Temporal feature engineering
+4. Model training with CatBoost classifier
+5. Model evaluation and visualization
+6. Model artifacts saved for inference
+
+```bash
+# Basic training
+python -m src.codestacker.training.train --data_path data/Competition_Dataset.csv
+
+# Training with MLflow tracking and visualization
+python -m src.codestacker.training.train --data_path data/Competition_Dataset.csv --use_mlflow --visualize
+
+# Using GPU acceleration
+python -m src.codestacker.training.train --data_path data/Competition_Dataset.csv --use_gpu
+```
+
+## Deployment
+
+### VPS Deployment
+
+1. Provision a VPS with Docker and Docker Compose installed
+2. Set up required GitHub Secrets for CI/CD
+3. Push to main branch to trigger deployment
+4. Configure appropriate security (firewall, SSL, etc.)
+
+### CI/CD Pipeline
+
+The GitHub Actions workflow includes:
+
+1. Testing: Run linting and tests on each push/PR
+2. Building: Build Docker images on pushes to main/develop
+3. Deployment: Deploy to VPS on pushes to main branch
+
+## Optional Integrations
+
+### Gemini AI
+
+For enhanced text processing, set up a Gemini API key:
+
+1. Obtain an API key from Google AI Studio
+2. Add to `.env` file: `GEMINI_API_KEY=your_api_key_here`
+3. Enable "Use Gemini for Description Processing" in the app
+
+### MongoDB
+
+For advanced logging and data storage:
+
+1. Set up MongoDB credentials in the `.env` file
+2. The app will automatically use MongoDB for logging and storing results
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

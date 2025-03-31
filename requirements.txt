@@ -1,0 +1,51 @@
+# Core data science
+pandas==2.2.3
+numpy==1.26.4
+scikit-learn==1.6.1
+scipy==1.15.2
+
+# Machine learning
+catboost==1.2.7
+xgboost==3.0.0
+lightgbm==4.6.0
+optuna==4.2.1
+
+# NLP and text processing
+nltk==3.9.1
+transformers==4.50.3
+sentence-transformers==4.0.1
+
+# Data visualization
+seaborn==0.13.2
+matplotlib>=3.8.0
+plotly==6.0.1
+
+# Geographical data
+geopandas==1.0.1
+shapely==2.0.7
+folium==0.19.5
+keplergl==0.3.7
+h3==4.2.2
+
+# Web and API
+streamlit==1.44.0
+streamlit-folium==0.24.0
+streamlit-plotly-events==0.0.6
+streamlit-lottie==0.0.5
+fastapi==0.115.12
+
+# Machine learning operations
+mlflow==2.21.2
+shap==0.47.1
+lime==0.2.0.1
+
+# Distributed computing
+dask==2025.3.0
+ray==2.44.1
+
+# Utilities
+python-dotenv==1.1.0
+loguru==0.7.3
+pymongo==4.11.3
+pdfplumber==0.11.6
+google-genai==1.8.0
