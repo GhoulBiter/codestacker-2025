@@ -31,3 +31,6 @@ __pycache__/
 old_*
 
 * copy/
+*.zip
+/old
+/plots
