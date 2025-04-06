@@ -1,25 +1,51 @@
-Analysis Neighborhoods - 2020 census tracts assigned to neighborhoods_20250330.zip
-Competition_Dataset.csv
-Cleaned_Competition_Dataset.csv
-engineered_test_data.csv
-engineered_train_data.csv
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Environment variables
+.env
+
+# Logs
+logs/
+*.log
+
+# Data files
 *.csv
+*.zip
+*.png
+*.dbf
 
+# Project-specific files
 catboost_info/
-
+challenge/
 planning_neighborhoods.dbf
-geo_export_43227ac5-047f-4fe8-aa84-8d60f1ff2159.cpg
-geo_export_43227ac5-047f-4fe8-aa84-8d60f1ff2159.dbf
-geo_export_43227ac5-047f-4fe8-aa84-8d60f1ff2159.prj
-geo_export_43227ac5-047f-4fe8-aa84-8d60f1ff2159.shp
-geo_export_43227ac5-047f-4fe8-aa84-8d60f1ff2159.shx
-nlp_components_visualization.png
-catboost_info/learn_error.tsv
-catboost_info/test_error.tsv
-catboost_info/time_left.tsv
-catboost_info/learn/events.out.tfevents
-catboost_info/test/events.out.tfevents
-catboost_info/tmp/cat_feature_index.4074ba08-35a4f8a8-9102678c-8a60a0ba.tmp
-catboost_info/tmp/cat_feature_index.a1abf2af-5374662f-c0629f91-36a66597.tmp
-model_artifacts/20250331_021734/nlp_components_visualization.png
-Competition_Dataset.csv
+geo_export_43227ac5-047f-4fe8-aa84-8d60f1ff2159.*
+model_artifacts/*
+plots/
+mlflow-db/
+mlflow-data/
+*.db
+
+# Backup/temp files
+old_*
+old/
+*\ copy/
+codestacker-2025.zip
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+.DS_Store

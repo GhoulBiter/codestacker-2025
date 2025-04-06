@@ -1,0 +1,113 @@
+services:
+  mlflow:
+    build:
+      context: .
+      dockerfile: src/codestacker/train/Dockerfile.mlflow
+    container_name: crime_classification_mlflow
+    ports:
+      - "${MLFLOW_PORT:-5000}:5000"
+    volumes:
+      - ./mlflow-data:/mlflow/artifacts # Local directory for artifacts
+      - ./mlflow-db:/app # For SQLite database persistence
+      - ./Competition_Dataset.csv:/app/Competition_Dataset.csv
+    networks:
+      - crime_classification_network
+    environment:
+      - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # Needed for Linux
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  train:
+    build:
+      context: .
+      dockerfile: src/codestacker/train/Dockerfile.train
+    container_name: crime_classification_train
+    depends_on:
+      - mlflow
+    volumes:
+      - ./src:/app/src
+      - ./logs:/app/logs
+      - ./model_artifacts:/app/model_artifacts
+      - ./data:/app/data
+      - ./.env:/app/.env
+      - ./Competition_Dataset.csv:/app/Competition_Dataset.csv
+    networks:
+      - crime_classification_network
+    environment:
+      - PYTHONPATH=/app
+      - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_DATABASE=${MONGO_DATABASE:-crime_classification}
+      - MONGO_COLLECTION_MLOPS=${MONGO_COLLECTION_MLOPS:-mlops_logs}
+      - MONGO_COLLECTION_TRAINING=${MONGO_COLLECTION_TRAINING:-training_logs}
+      - TRAINING_ENABLED=${TRAINING_ENABLED:-false}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: ["python", "-m", "src.codestacker.train.train"]
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: src/codestacker/app/Dockerfile.streamlit
+    container_name: crime_classification_streamlit
+    depends_on:
+      - mlflow
+    ports:
+      - "${STREAMLIT_PORT:-8501}:8501"
+    volumes:
+      - ./src:/app/src
+      - ./logs:/app/logs
+      - ./model_artifacts:/app/model_artifacts # Share model artifacts with the Streamlit app
+      - ./data:/app/data
+      - ./.env:/app/.env
+      - ./Competition_Dataset.csv:/app/Competition_Dataset.csv
+    networks:
+      - crime_classification_network
+    environment:
+      - PYTHONPATH=/app
+      - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_DATABASE=${MONGO_DATABASE:-crime_classification}
+      - MONGO_COLLECTION_STREAMLIT=${MONGO_COLLECTION_STREAMLIT:-streamlit_logs}
+      - MONGO_COLLECTION_RESULTS=${MONGO_COLLECTION_RESULTS:-results}
+      - STREAMLIT_BROWSER_GATHER_USAGE_STATS=${STREAMLIT_BROWSER_GATHER_USAGE_STATS:-true}
+      - STREAMLIT_MAX_DATA_ROWS=${STREAMLIT_MAX_DATA_ROWS:-20000}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    command:
+      [
+        "streamlit",
+        "run",
+        "src/codestacker/app/app.py",
+        "--server.port=8501",
+        "--server.address=0.0.0.0",
+      ]
+
+networks:
+  crime_classification_network:
+    driver: bridge

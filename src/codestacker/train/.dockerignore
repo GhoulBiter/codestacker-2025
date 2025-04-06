@@ -1,0 +1,66 @@
+# Exclude version control
+.git
+.gitignore
+
+# Exclude Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Exclude logs and local data
+logs/
+*.log
+model_artifacts/
+mlruns/
+mlflow.db
+
+# Exclude Docker files
+Dockerfile*
+.dockerignore
+docker-compose*
+
+# Exclude virtual environments
+venv/
+.venv/
+ENV/
+
+# Exclude IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Exclude test and documentation
+tests/
+docs/
+README.md
+LICENSE
+
+# Exclude large data files (add your specific data extensions)
+*.csv
+*.parquet
+*.pickle
+*.pkl
+*.h5
+*.npy
+*.npz
+
+# Add an exception for the dataset the model needs
+!data/Competition_Dataset.csv

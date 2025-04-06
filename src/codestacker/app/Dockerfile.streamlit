@@ -1,0 +1,32 @@
+# Use Python 3.11-slim as the base image
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements file
+COPY requirements.txt /app/
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Create necessary directories with proper permissions
+RUN mkdir -p /app/logs && \
+    chmod -R 777 /app/logs
+
+# Set environment variables
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
+# Expose Streamlit port
+EXPOSE 8501
+
+# Set entrypoint to run the Streamlit app
+ENTRYPOINT ["streamlit", "run", "src/codestacker/app/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
