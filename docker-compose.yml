@@ -5,7 +5,7 @@ services:
       dockerfile: src/codestacker/train/Dockerfile.mlflow
     container_name: crime_classification_mlflow
     ports:
-      - "${MLFLOW_PORT:-5000}:5000"
+      - "${MLFLOW_PORT:-5001}:5000"
     volumes:
       - ./mlflow-data:/mlflow/artifacts # Local directory for artifacts
       - ./mlflow-db:/app # For SQLite database persistence
@@ -17,7 +17,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway" # Needed for Linux
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      test: ["CMD", "curl", "-f", "http://localhost:5001"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -69,7 +69,7 @@ services:
     depends_on:
       - mlflow
     ports:
-      - "${STREAMLIT_PORT:-8501}:8501"
+      - "${STREAMLIT_PORT:-8503}:8503"
     volumes:
       - ./src:/app/src
       - ./logs:/app/logs
@@ -94,7 +94,7 @@ services:
       - STREAMLIT_MAX_DATA_ROWS=${STREAMLIT_MAX_DATA_ROWS:-20000}
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8501"]
+      test: ["CMD", "curl", "-f", "http://localhost:8503"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -104,7 +104,7 @@ services:
         "streamlit",
         "run",
         "src/codestacker/app/app.py",
-        "--server.port=8501",
+        "--server.port=8503",
         "--server.address=0.0.0.0",
       ]
 
